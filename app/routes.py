@@ -10,28 +10,28 @@ router = APIRouter()
 @router.post("/generate")
 async def generate(
     request: PromptRequest,
-    _=Depends(rate_limiter)
+    _=Depends(rate_limiter)         # run rate limiter before handler
 ):
     # Moderation check
-    is_safe = await moderate(request.prompt)
+    is_safe = await moderate(request.prompt)        # Guard layer
     if not is_safe:
         raise HTTPException(status_code=400, detail="Unsafe content")
 
     # Cache check
-    cached = await get_cache(request.prompt)
+    cached = await get_cache(request.prompt)        # Performance optimization
     if cached:
         return {"success": True, "output": cached, "cached": True}
 
     # LLM Call
     try:
-        output = await call_llm(request.prompt)
+        output = await call_llm(request.prompt)     # Core business action
     except Exception as e:
         return {
             "success": False,
             "error": str(e),
-            "message": "Out of Open AI credits, you can sponser me a $500 for my details call on 6303608901"
+            "message": "LLM service temporarily unavailable"
         }
     # Store in cache
-    await set_cache(request.prompt, output)
+    await set_cache(request.prompt, output)         # Write-through caching pattern
 
     return {"success": True, "output": output, "cached": False}

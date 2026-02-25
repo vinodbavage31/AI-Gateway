@@ -1,9 +1,9 @@
 import hashlib
 
-cache_store = {}
+cache_store = {}        # In-memory dictionary cache, Fast but temporary
 
 def generate_key(prompt: str):
-    return hashlib.sha256(prompt.encode()).hexdigest()
+    return hashlib.sha256(prompt.encode()).hexdigest()  # fixed length, avoids huge keys, avoids special char issues
 
 async def get_cache(prompt: str):
     key = generate_key(prompt)
